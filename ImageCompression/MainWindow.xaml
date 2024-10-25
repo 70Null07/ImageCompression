@@ -1,0 +1,29 @@
+﻿<Window x:Class="ImageCompression.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Image Compressor" Height="250" Width="400">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="183*"/>
+            <ColumnDefinition Width="17*"/>
+        </Grid.ColumnDefinitions>
+        <Button Command="{Binding SelectImageCommand}" Content="Select Image" HorizontalAlignment="Left" VerticalAlignment="Top" Width="111" Margin="10,10,0,0" Height="35"/>
+        <TextBlock Text="{Binding Image.FilePath}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,50,0,0"/>
+        <ComboBox SelectedItem="{Binding Image.CompressionType}" HorizontalAlignment="Left" VerticalAlignment="Top" Width="160" Margin="126,10,0,0" Height="35">
+            <ComboBoxItem Content="JPEG"/>
+            <ComboBoxItem Content="WebP"/>
+            <ComboBoxItem Content="BMP"/>
+            <ComboBoxItem Content="GIF"/>
+        </ComboBox>
+        <Slider Minimum="0" Maximum="100" Value="{Binding Image.Quality}" HorizontalAlignment="Left" VerticalAlignment="Top" Width="114" Margin="10,97,0,0"/>
+        <CheckBox Content="Progressive" IsChecked="{Binding Image.Progressive}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,132,0,0" RenderTransformOrigin="0.555,-0.395"/>
+        <ComboBox SelectedItem="{Binding Image.ChromaSubsampling}" HorizontalAlignment="Left" VerticalAlignment="Top" Width="114" Margin="10,184,0,0">
+            <ComboBoxItem Content="4:4:4"/>
+            <ComboBoxItem Content="4:2:2"/>
+            <ComboBoxItem Content="4:2:0"/>
+        </ComboBox>
+        <Button Command="{Binding CompressImageCommand}" Content="Compress" HorizontalAlignment="Left" VerticalAlignment="Top" Width="106" Margin="284,184,0,0" Height="22" Grid.ColumnSpan="2"/>
+        <Label x:Name="label" Content="Степень сжатия с потерями" HorizontalAlignment="Left" Margin="10,66,0,0" VerticalAlignment="Top" Width="166"/>
+        <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="10,163,0,0" TextWrapping="Wrap" VerticalAlignment="Top"><Span Background="White" Foreground="Blue" FontFamily="Cascadia Mono" FontSize="12.666666666666666"/>ChromaSubsampling</TextBlock>
+    </Grid>
+</Window>

@@ -47,13 +47,23 @@ namespace ImageCompression.Views
         private void CompressImage(object parameter)
         {
             var type = Image.CompressionType.Split(" ").Last();
-            string outputFileName = $"{Path.GetFileNameWithoutExtension(Image.FilePath)}_{type}_{DateTime.Now:yyyyMMdd_HHmmss}{Path.GetExtension(Image.FilePath)}";
+
+            string extension = type switch
+            {
+                "JPEG" => ".jpg",
+                "WebP" => ".webp",
+                "BMP" => ".bmp",
+                "GIF" => ".gif",
+                _ => Path.GetExtension(Image.FilePath)
+            };
+
+            string outputFileName = $"{Path.GetFileNameWithoutExtension(Image.FilePath)}_{type}_{DateTime.Now:yyyyMMdd_HHmmss}{extension}";
             Image.OutputPath = Path.Combine(Path.GetDirectoryName(Image.FilePath), outputFileName);
 
             switch (type)
             {
                 case "JPEG":
-                    CompressJpeg(Image.FilePath, Image.OutputPath, Image.Quality, Image.Progressive);
+                    CompressJpeg(Image.FilePath, Image.OutputPath, Image.Quality, Image.Progressive, Image.ChromaSubsampling);
                     break;
                 case "WebP":
                     CompressWebP(Image.FilePath, Image.OutputPath, Image.Quality);
@@ -67,23 +77,7 @@ namespace ImageCompression.Views
             }
         }
 
-        private void CompressWithFFmpeg(string inputPath, string outputPath, int quality)
-        {
-            var ffmpeg = new ProcessStartInfo
-            {
-                FileName = "ffmpeg",
-                Arguments = $"-i {inputPath} -q:v {quality} -progressive 1 {outputPath}",
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-            using (var process = Process.Start(ffmpeg))
-            {
-                process.WaitForExit();
-            }
-        }
-
-        private void CompressJpeg(string inputPath, string outputPath, int quality, bool progressive)
+        private void CompressJpeg(string inputPath, string outputPath, int quality, bool progressive, string chromaSubsampling)
         {
             using (var bitmap = new Bitmap(inputPath))
             {
@@ -96,9 +90,34 @@ namespace ImageCompression.Views
                 }
             }
 
+            // Если progressive, используем FFmpeg
             if (progressive)
             {
-                CompressWithFFmpeg(inputPath, outputPath, quality);
+                CompressWithFFmpeg(inputPath, outputPath, quality, chromaSubsampling);
+            }
+        }
+
+        private void CompressWithFFmpeg(string inputPath, string outputPath, int quality, string chromaSubsampling)
+        {
+            var chromaParameter = chromaSubsampling switch
+            {
+                "4:4:4" => "yuv444p",
+                "4:2:2" => "yuv422p",
+                "4:2:0" => "yuv420p",
+                _ => "yuv420p" // По умолчанию
+            };
+
+            var ffmpeg = new ProcessStartInfo
+            {
+                FileName = "ffmpeg",
+                Arguments = $"-i {inputPath} -q:v {quality} -pix_fmt {chromaParameter} {outputPath}",
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+            using (var process = Process.Start(ffmpeg))
+            {
+                process.WaitForExit();
             }
         }
 
